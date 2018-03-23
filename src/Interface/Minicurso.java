@@ -7,10 +7,15 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.net.InetAddress;
+
 public class Minicurso extends Application {
     
     @Override
     public void start(Stage stage) throws Exception {
+        System.setProperty("java.net.preferIPv4Stack" , "true");
+        String localhost = InetAddress.getLocalHost().toString().split("/", 2)[1];
+        System.setProperty("jgroups.bind_addr" , localhost);
         FXMLLoader loader = new FXMLLoader(getClass().getResource("Tela.fxml"));
         Parent root = loader.load();
         Controller controller = loader.getController();

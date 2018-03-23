@@ -117,7 +117,9 @@ public class Controller implements Initializable, Serializable {
     @FXML
     private void handleButtonEnviar() throws Exception {
         String msg = textField.getText();
-        chat.enviarMsg(msg);
+        if(!msg.isEmpty()) {
+            chat.enviarMsg(msg);
+        }
         textField.setText("");
     }
 
@@ -177,7 +179,6 @@ public class Controller implements Initializable, Serializable {
             });
             btnGrupos.add(button);
             vBoxSelecaoGrupos.getChildren().add(button);
-            //svBoxSelecaoGrupos.getChildren().add(new Separator());
         }
     }
 
