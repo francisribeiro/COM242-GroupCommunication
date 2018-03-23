@@ -150,7 +150,7 @@ public class Chat extends ReceiverAdapter {
         }
     }
 
-    public void fechaCanal() {
+    private void fechaCanal() {
         if (channel.isOpen()) {
             state.clear();
             historico = "";
