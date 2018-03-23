@@ -22,10 +22,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
-import javafx.scene.control.Separator;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -120,7 +118,6 @@ public class Controller implements Initializable, Serializable {
     private void handleButtonEnviar() throws Exception {
         String msg = textField.getText();
         chat.enviarMsg(msg);
-        //textArea.appendText(chat.getHistorico());
         textField.setText("");
     }
 
@@ -206,17 +203,17 @@ public class Controller implements Initializable, Serializable {
         }
     }
 
-    public ArrayList<Grupos> getGrupos() {
-        return grupos;
-    }
-
-    public Grupos getGrupos(String nome) {
+    public Grupos getGrupo(String nome) {
         for (int i = 0; i < grupos.size(); i++) {
             if (grupos.get(i).getNome().equals(nome)) {
                 return grupos.get(i);
             }
         }
         return null;
+    }
+
+    public ArrayList<Grupos> getGrupos() {
+        return grupos;
     }
 
     public Chat getChat() {

@@ -1,15 +1,13 @@
 package Chat;
 
-import org.jgroups.JChannel;
-import org.jgroups.Message;
-import org.jgroups.ReceiverAdapter;
-import org.jgroups.View;
+import org.jgroups.*;
+import org.jgroups.protocols.TP;
 import org.jgroups.util.Util;
 import java.io.*;
 import java.net.InetAddress;
 import java.util.List;
 import java.util.LinkedList;
-import org.jgroups.Address;
+
 import org.jgroups.util.Buffer;
 import org.jgroups.util.ByteArrayDataOutputStream;
 
@@ -17,7 +15,7 @@ public class Chat extends ReceiverAdapter {
 
     private JChannel channel;
     private String historico;
-    private String fileName;
+    private File fileAnexo;
     private Buffer buffer;
     private Grupos grupo;
     private final Controller ctr;
@@ -36,7 +34,7 @@ public class Chat extends ReceiverAdapter {
         channel = new JChannel("tcp.xml");
         channel.setReceiver(this);
         channel.connect(grupoNome);
-        grupo = ctr.getGrupos(grupoNome);
+        grupo = ctr.getGrupo(grupoNome);
         
         File dir = new File("Anexos/"+grupoNome);
         dir.mkdir();
@@ -60,7 +58,7 @@ public class Chat extends ReceiverAdapter {
     }
 
     public void enviarAnexo(File anexo) throws Exception {
-        fileName = anexo.getName();
+        fileAnexo = anexo;
         String msgCompleta = "";
         msgCompleta = "[" + user_name + "] : Enviando anexo :" + anexo.getName() + "\n"; //Adicionando nome do remetente à mensagem
         Message msg = new Message(null, null, msgCompleta);
@@ -68,6 +66,7 @@ public class Chat extends ReceiverAdapter {
         buffer = lerArquivo(anexo);
         try {
             msg = new Message(null, buffer.getBuf(), 0, buffer.getLength());
+            msg.setFlag(Message.Flag.INTERNAL);
             channel.send(msg);
             msgCompleta = "[" + user_name + "] : Anexo " + anexo.getName() + " recebido com sucesso\n"; //Adicionando nome do remetente à mensagem
             msg = new Message(null, null, msgCompleta);
@@ -92,22 +91,20 @@ public class Chat extends ReceiverAdapter {
 
     @Override
     public void receive(Message msg) {
-        try {
+        if(!msg.isFlagSet(Message.Flag.INTERNAL)) {
             String mensagem = msg.getSrc() + ": " + msg.getObject();
-            String[] nomeArquivo = mensagem.split(":");
-            if (nomeArquivo.length == 4) {
-                fileName = nomeArquivo[3];
-            }
             historico += mensagem + "\n";
             ctr.getTextArea().appendText(mensagem + "\n");
 
             synchronized (state) {
                 state.add(mensagem);
             }
-        } catch (Exception ex) {
+        } else {
             try {
-                System.out.println(grupo.getNome()+"/"+fileName);
-                File temp = new File(fileName);
+                System.out.println("Anexos"+File.separator+grupo.getNome()+File.separator+fileAnexo.getName());
+                File temp = new File("Anexos"+File.separator+grupo.getNome()+File.separator+fileAnexo.getName());
+                temp.getParentFile().mkdirs();
+                temp.createNewFile();
                 FileOutputStream out = new FileOutputStream(temp);
                 out.write(msg.getBuffer(), msg.getOffset(), msg.getLength());
                 out.close();
