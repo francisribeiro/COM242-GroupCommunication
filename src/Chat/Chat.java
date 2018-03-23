@@ -53,16 +53,14 @@ public class Chat extends ReceiverAdapter {
     }
 
     public void enviarMsg(String msgCrua) throws Exception {
-        String msgCompleta = "";
-        msgCompleta = "[" + user_name + "] :" + msgCrua + "\n"; //Adicionando nome do remetente à mensagem
+        String msgCompleta = "[" + user_name + "] :" + msgCrua + "\n"; //Adicionando nome do remetente à mensagem
         Message msg = new Message(null, null, msgCompleta);
         channel.send(msg);
     }
 
     public void enviarAnexo(File anexo) throws Exception {
         fileName = anexo.getName();
-        String msgCompleta = "";
-        msgCompleta = "[" + user_name + "] : Enviando anexo :" + anexo.getName() + "\n"; //Adicionando nome do remetente à mensagem
+        String msgCompleta = "[" + user_name + "] : Enviando anexo :" + anexo.getName() + "\n"; //Adicionando nome do remetente à mensagem
         Message msg = new Message(null, null, msgCompleta);
         channel.send(msg);
         buffer = lerArquivo(anexo);

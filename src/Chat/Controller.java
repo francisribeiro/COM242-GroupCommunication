@@ -114,7 +114,7 @@ public class Controller implements Initializable, Serializable {
     }
 
     @FXML
-    private void handleAddGrupo() throws IOException {
+    private void handleAddGrupo() {
         Stage stage = new Stage();
         Label nome = new Label("Nome do Grupo");
         nome.setMaxSize(250, 200);
@@ -156,8 +156,8 @@ public class Controller implements Initializable, Serializable {
     public void criarBotoesGrupos() {
         btnGrupos = new ArrayList<>();
         vBoxSelecaoGrupos.getChildren().clear();
-        for (int i = 0; i < grupos.size(); i++) {
-            Button button = new Button(grupos.get(i).getNome());
+        for (Grupos grupo : grupos) {
+            Button button = new Button(grupo.getNome());
             button.setMinSize(252, 40);
             button.getStyleClass().add("btn-info");
             button.setOnAction((event) -> {
@@ -200,9 +200,9 @@ public class Controller implements Initializable, Serializable {
     }
 
     public Grupos getGrupos(String nome) {
-        for (int i = 0; i < grupos.size(); i++) {
-            if (grupos.get(i).getNome().equals(nome)) {
-                return grupos.get(i);
+        for (Grupos grupo : grupos) {
+            if (grupo.getNome().equals(nome)) {
+                return grupo;
             }
         }
         return null;
