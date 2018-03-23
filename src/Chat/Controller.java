@@ -1,3 +1,8 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package Chat;
 
 import java.io.File;
@@ -26,6 +31,10 @@ import javafx.stage.Stage;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 
+/**
+ *
+ * @author vinic
+ */
 public class Controller implements Initializable, Serializable {
 
     private Chat chat;
@@ -109,12 +118,11 @@ public class Controller implements Initializable, Serializable {
     private void handleButtonEnviar() throws Exception {
         String msg = textField.getText();
         chat.enviarMsg(msg);
-        //textArea.appendText(chat.getHistorico());
         textField.setText("");
     }
 
     @FXML
-    private void handleAddGrupo() {
+    private void handleAddGrupo() throws IOException {
         Stage stage = new Stage();
         Label nome = new Label("Nome do Grupo");
         nome.setMaxSize(250, 200);
@@ -156,8 +164,8 @@ public class Controller implements Initializable, Serializable {
     public void criarBotoesGrupos() {
         btnGrupos = new ArrayList<>();
         vBoxSelecaoGrupos.getChildren().clear();
-        for (Grupos grupo : grupos) {
-            Button button = new Button(grupo.getNome());
+        for (int i = 0; i < grupos.size(); i++) {
+            Button button = new Button(grupos.get(i).getNome());
             button.setMinSize(252, 40);
             button.getStyleClass().add("btn-info");
             button.setOnAction((event) -> {
@@ -195,17 +203,17 @@ public class Controller implements Initializable, Serializable {
         }
     }
 
-    public ArrayList<Grupos> getGrupos() {
-        return grupos;
-    }
-
-    public Grupos getGrupos(String nome) {
-        for (Grupos grupo : grupos) {
-            if (grupo.getNome().equals(nome)) {
-                return grupo;
+    public Grupos getGrupo(String nome) {
+        for (int i = 0; i < grupos.size(); i++) {
+            if (grupos.get(i).getNome().equals(nome)) {
+                return grupos.get(i);
             }
         }
         return null;
+    }
+
+    public ArrayList<Grupos> getGrupos() {
+        return grupos;
     }
 
     public Chat getChat() {
