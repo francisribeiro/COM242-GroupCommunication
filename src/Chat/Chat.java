@@ -38,7 +38,7 @@ public class Chat extends ReceiverAdapter {
         channel.connect(grupoNome);
         grupo = ctr.getGrupos(grupoNome);
         
-        File dir = new File(grupoNome);
+        File dir = new File("Anexos/"+grupoNome);
         dir.mkdir();
         
         View vi = channel.getView();
