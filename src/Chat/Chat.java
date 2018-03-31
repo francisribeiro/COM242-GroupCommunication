@@ -3,6 +3,7 @@ package Chat;
 import org.jgroups.*;
 import org.jgroups.protocols.TP;
 import org.jgroups.util.Util;
+
 import java.io.*;
 import java.net.InetAddress;
 import java.util.List;
@@ -11,11 +12,12 @@ import java.util.LinkedList;
 import org.jgroups.util.Buffer;
 import org.jgroups.util.ByteArrayDataOutputStream;
 
+import javax.swing.*;
+
 public class Chat extends ReceiverAdapter {
 
     private JChannel channel;
     private String historico;
-    private File fileAnexo;
     private String fileName;
     private Buffer buffer;
     private Grupos grupo;
@@ -33,10 +35,14 @@ public class Chat extends ReceiverAdapter {
         channel.setReceiver(this);
         channel.connect(grupoNome);
         grupo = ctr.getGrupo(grupoNome);
-        
-        File dir = new File("Anexos/"+grupoNome);
-        dir.mkdir();
-        
+
+        File dir = new File("Anexos/" + grupoNome);
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
+                throw new Exception("Não foi possível criar a pasta de anexos.");
+            }
+        }
+
         View vi = channel.getView();
         List<Address> end = vi.getMembers();
         for (Address a : end) {
@@ -52,39 +58,49 @@ public class Chat extends ReceiverAdapter {
     }
 
     public void enviarAnexo(File anexo) throws Exception {
-        fileAnexo = anexo;
-        String msgCompleta = "[" + user_name + "] : Enviando anexo :" + anexo.getName(); //Adicionando nome do remetente à mensagem
+        String msgCompleta = "[" + user_name + "] : Recebendo anexo :" + anexo.getName(); //Adicionando nome do remetente à mensagem
         Message msg = new Message(null, null, msgCompleta);
+        // Flag para quem envia não receber a mensagem de informação
+        msg.setTransientFlag(Message.TransientFlag.DONT_LOOPBACK);
         channel.send(msg);
         buffer = lerArquivo(anexo);
         try {
             msg = new Message(null, buffer.getBuf(), 0, buffer.getLength());
             msg.setFlag(Message.Flag.INTERNAL);
+            msg.setTransientFlag(Message.TransientFlag.DONT_LOOPBACK);
             channel.send(msg);
             msgCompleta = "[" + user_name + "] : Anexo " + anexo.getName() + " recebido com sucesso "; //Adicionando nome do remetente à mensagem
             msg = new Message(null, null, msgCompleta);
+            // Flag para quem envia não receber a mensagem de confirmação
+            msg.setTransientFlag(Message.TransientFlag.DONT_LOOPBACK);
             channel.send(msg);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
     }
 
     private static Buffer lerArquivo(File anexo) throws Exception {
-        int size = (int) anexo.length();
-        FileInputStream input = new FileInputStream(anexo);
-        ByteArrayDataOutputStream out = new ByteArrayDataOutputStream(size);
-        byte[] read_buf = new byte[8096];
-        int bytes;
-        while ((bytes = input.read(read_buf)) != -1) {
-            out.write(read_buf, 0, bytes);
+        try {
+            int size = (int) anexo.length();
+            FileInputStream input = new FileInputStream(anexo);
+            ByteArrayDataOutputStream out = new ByteArrayDataOutputStream(size);
+            byte[] read_buf = new byte[8096];
+            int bytes;
+            while ((bytes = input.read(read_buf)) != -1) {
+                out.write(read_buf, 0, bytes);
+            }
+            input.close();
+            return out.getBuffer();
+        } catch (IOException ex) {
+            throw new Exception("Erro ao ler o arquivo: " + anexo.getName());
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
         }
-        input.close();
-        return out.getBuffer();
     }
 
     @Override
     public void receive(Message msg) {
-        if(!msg.isFlagSet(Message.Flag.INTERNAL)) {
+        if (!msg.isFlagSet(Message.Flag.INTERNAL)) {
             String mensagem = msg.getSrc() + ": " + msg.getObject();
             String[] nomeArquivo = mensagem.split(":");
             if (nomeArquivo.length == 4) {
@@ -98,13 +114,14 @@ public class Chat extends ReceiverAdapter {
             }
         } else {
             try {
-                System.out.println("Anexos"+File.separator+grupo.getNome()+File.separator+fileName);
-                File temp = new File("Anexos"+File.separator+grupo.getNome()+File.separator+fileName);
-                temp.getParentFile().mkdirs();
-                temp.createNewFile();
-                FileOutputStream out = new FileOutputStream(temp);
-                out.write(msg.getBuffer(), msg.getOffset(), msg.getLength());
-                out.close();
+                File temp = new File("Anexos" + File.separator + grupo.getNome() + File.separator + fileName);
+                if (temp.createNewFile()) {
+                    FileOutputStream out = new FileOutputStream(temp);
+                    out.write(msg.getBuffer(), msg.getOffset(), msg.getLength());
+                    out.close();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Não foi possível criar o arquivo do anexo");
+                }
             } catch (IOException ie) {
                 ie.printStackTrace();
             }
@@ -132,9 +149,7 @@ public class Chat extends ReceiverAdapter {
             state.clear();
             state.addAll(list);
         }
-        System.out.println("received state (" + list.size() + " messages in chat history):");
         for (String str : list) {
-            System.out.println(str);
             historico += str + "\n";
         }
         ctr.getTextArea().appendText(historico);
@@ -158,11 +173,4 @@ public class Chat extends ReceiverAdapter {
         }
     }
 
-    public JChannel getChannel() {
-        return channel;
-    }
-
-    public String getHistorico() {
-        return historico;
-    }
 }

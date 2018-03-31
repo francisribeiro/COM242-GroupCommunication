@@ -15,6 +15,7 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -28,11 +29,11 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 
 /**
- *
  * @author vinic
  */
 public class Controller implements Initializable, Serializable {
@@ -66,22 +67,13 @@ public class Controller implements Initializable, Serializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        btnEnviar.getStyleClass().add("btn-primary");
-        btnAnexo.getStyleClass().add("btn-primary");
-        btnAddGrupo.getStyleClass().add("btn-primary");
-        desconectar.getStyleClass().add("btn-danger");
-        textArea.getStyleClass().add("text-field");
-        textField.getStyleClass().add("text-field");
-        labelGrupo.getStyleClass().add("h4");
-        title.getStyleClass().add("h3");
-        paneGrupos.getStyleClass().add("pane");
-        areadeChat.getStyleClass().add("pane");
+        addStyle();
         lerGrupos();
         criarBotoesGrupos();
     }
 
     @FXML
-    private void handleJoinGroup(Button button) throws Exception {
+    private void handleJoinGroup(Button button) {
         for (int i = 0; i < btnGrupos.size(); i++) {
             if (button.equals(btnGrupos.get(i))) {
                 JPasswordField senha = new JPasswordField();
@@ -95,7 +87,12 @@ public class Controller implements Initializable, Serializable {
                         areadeChat.setVisible(true);
                         paneGrupos.setDisable(true);
                         chat = new Chat(this);
-                        chat.start(grupos.get(i).getNome());
+                        try {
+                            chat.start(grupos.get(i).getNome());
+                        } catch (Exception e) {
+                            JOptionPane.showMessageDialog(null,
+                                    "Erro ao iniciar o canal do grupo" + e.getMessage());
+                        }
                     } else {
                         JOptionPane.showMessageDialog(senha, "Senha inválida");
                     }
@@ -115,10 +112,14 @@ public class Controller implements Initializable, Serializable {
     }
 
     @FXML
-    private void handleButtonEnviar() throws Exception {
+    private void handleButtonEnviar() {
         String msg = textField.getText();
-        if(!msg.isEmpty()) {
-            chat.enviarMsg(msg);
+        if (!msg.isEmpty()) {
+            try {
+                chat.enviarMsg(msg);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Erro ao enviar a mensagem: " + e.getMessage());
+            }
         }
         textField.setText("");
     }
@@ -159,7 +160,10 @@ public class Controller implements Initializable, Serializable {
         fileChooser.setTitle("");
         File file = fileChooser.showOpenDialog(null);
         if (file != null) {
-            chat.enviarAnexo(file);
+            // 10MB
+            if (file.length() < 10000000) chat.enviarAnexo(file);
+            else JOptionPane.showMessageDialog(null,
+                    "O arquivo excede o limite de 10MB.");
         }
     }
 
@@ -213,32 +217,25 @@ public class Controller implements Initializable, Serializable {
         return null;
     }
 
-    public ArrayList<Grupos> getGrupos() {
-        return grupos;
-    }
-
     public Chat getChat() {
         return chat;
     }
 
-    public ArrayList<Button> getBtnGrupos() {
-        return btnGrupos;
-    }
-
-    public VBox getSelecaoGrupos() {
-        return vBoxSelecaoGrupos;
-    }
-
-    public Button getBtnAnexo() {
-        return btnAnexo;
-    }
-
-    public Button getBtnEnviar() {
-        return btnEnviar;
-    }
-
     public TextArea getTextArea() {
         return textArea;
+    }
+
+    private void addStyle() {
+        btnEnviar.getStyleClass().add("btn-primary");
+        btnAnexo.getStyleClass().add("btn-primary");
+        btnAddGrupo.getStyleClass().add("btn-primary");
+        desconectar.getStyleClass().add("btn-danger");
+        textArea.getStyleClass().add("text-field");
+        textField.getStyleClass().add("text-field");
+        labelGrupo.getStyleClass().add("h4");
+        title.getStyleClass().add("h3");
+        paneGrupos.getStyleClass().add("pane");
+        areadeChat.getStyleClass().add("pane");
     }
 
 }

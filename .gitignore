@@ -11,6 +11,7 @@ desktop.ini
 Anexos/*
 
 # User-specific stuff:
+.idea/artifacts
 .idea/workspace.xml
 .idea/tasks.xml
 .idea/dictionaries
@@ -31,7 +32,7 @@ Anexos/*
 ## Plugin-specific files:
 
 # IntelliJ
-/out/
+/out/*
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/

@@ -10,7 +10,9 @@ import javafx.stage.Stage;
 import java.net.InetAddress;
 
 public class Minicurso extends Application {
-    
+
+    private Controller controller;
+
     @Override
     public void start(Stage stage) throws Exception {
         System.setProperty("java.net.preferIPv4Stack" , "true");
@@ -18,20 +20,22 @@ public class Minicurso extends Application {
         System.setProperty("jgroups.bind_addr" , localhost);
         FXMLLoader loader = new FXMLLoader(getClass().getResource("Tela.fxml"));
         Parent root = loader.load();
-        Controller controller = loader.getController();
+        controller = loader.getController();
         Scene scene = new Scene(root);
         stage.setScene(scene);
-        stage.setOnCloseRequest(e->{
-            try {
-                controller.serializar();
-                if(controller.getChat() != null) {
-                    controller.getChat().desconectar();
-                }
-            } catch (Exception ex) {
-                System.out.println(ex.getMessage());
-            }
-        });
         stage.show();
+    }
+
+    @Override
+    public void stop() {
+        try {
+            controller.serializar();
+            if(controller.getChat() != null) {
+                controller.getChat().desconectar();
+            }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
     }
     
     public static void main(String[] args) {
